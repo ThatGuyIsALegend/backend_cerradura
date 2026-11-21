@@ -1,0 +1,35 @@
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-face_lock}
+      POSTGRES_USER: ${POSTGRES_USER:-face_lock}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-face_lock_local}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+    restart: unless-stopped
+
+  api:
+    build: .
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-face_lock}:${POSTGRES_PASSWORD:-face_lock_local}@db:5432/${POSTGRES_DB:-face_lock}
+    ports:
+      - "${API_PORT:-8000}:8000"
+    volumes:
+      - insightface_models:/root/.insightface
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  insightface_models:
