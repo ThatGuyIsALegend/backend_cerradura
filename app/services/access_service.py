@@ -4,12 +4,14 @@ from app.database.models import AccessLog
 
 
 def create_access_log(db: Session, *, result: str, reason: str,
-                      user_id=None, similarity: float | None = None):
+                      user_id=None, similarity: float | None = None,
+                      image_path: str | None = None):
     log = AccessLog(
         result=result,
         reason=reason,
         user_id=user_id,
         similarity=similarity,
+        image_path=image_path,
     )
     db.add(log)
     db.flush()

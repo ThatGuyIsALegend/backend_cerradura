@@ -140,6 +140,11 @@ class AccessLog(Base):
         nullable=True
     )
 
+    image_path = Column(
+        String(255),
+        nullable=True
+    )
+
     attempted_at = Column(
         DateTime(timezone=True),
         server_default=func.now()

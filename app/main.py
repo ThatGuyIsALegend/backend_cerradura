@@ -6,6 +6,7 @@ from sqlalchemy import text
 
 from app.core.config import settings
 from app.database.connection import engine, Base
+from app.services.attempt_images import storage_dir
 
 # Importar modelos para que SQLAlchemy los registre
 from app.database import models
@@ -22,6 +23,17 @@ async def lifespan(app: FastAPI):
 
     # Crear tablas si no existen
     Base.metadata.create_all(bind=engine)
+
+    # `create_all` no migra tablas existentes: añadir la columna de la
+    # foto si la base ya tenía `access_logs` creada.
+    with engine.begin() as connection:
+        connection.execute(
+            text("ALTER TABLE access_logs "
+                 "ADD COLUMN IF NOT EXISTS image_path VARCHAR(255)")
+        )
+
+    # Crear directorio donde se guardan las fotos de los intentos.
+    storage_dir()
 
     print("Base de datos inicializada correctamente")
 

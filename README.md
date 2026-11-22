@@ -4,7 +4,7 @@ Backend FastAPI para registrar personas con consentimiento, comparar rostros y g
 
 ## Configuración
 
-Configura `.env` con `DATABASE_URL`, `SECRET_KEY` y una `DEVICE_API_KEY` larga y aleatoria. `FACE_MATCH_THRESHOLD` controla el umbral de similitud (por defecto `0.45`). La API usa PostgreSQL con la extensión `vector`.
+Configura `.env` con `DATABASE_URL`, `SECRET_KEY` y una `DEVICE_API_KEY` larga y aleatoria. `FACE_MATCH_THRESHOLD` controla el umbral de similitud (por defecto `0.45`). `ACCESS_ATTEMPTS_DIR` define dónde se guardan las fotos de los intentos (por defecto `storage/access_attempts`). La API usa PostgreSQL con la extensión `vector`.
 
 ## Ejecutar con Docker Compose
 
@@ -33,7 +33,7 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
-En el arranque se crea la extensión `vector` y se crean las tablas que falten. La API interactiva está en `/docs`.
+En el arranque se crea la extensión `vector` y se crean las tablas que falten. La API interactiva está en `/docs`. Si la tabla `access_logs` ya existía, se añade automáticamente la columna `image_path` (`ALTER TABLE ... ADD COLUMN IF NOT EXISTS`).
 
 ## Endpoints
 
@@ -48,11 +48,12 @@ Todas las rutas usan el prefijo `/api/v1`.
 | PUT | `/users/{id}` | Actualiza información |
 | DELETE | `/users/{id}` | Elimina persona y embeddings |
 | POST | `/recognition/verify` | Comprueba una imagen (`image` en multipart) |
-| POST | `/devices/access-attempt` | Recibe el intento autenticado de la cerradura |
-| GET | `/access-logs` | Lista intentos |
+| POST | `/devices/access-attempt` | Recibe el intento autenticado de la cerradura y guarda la foto |
+| GET | `/access-logs` | Lista intentos (incluye `image_path` si hay foto guardada) |
 | GET | `/access-logs/{id}` | Consulta un intento |
+| GET | `/access-logs/{id}/image` | Descarga la foto guardada del intento |
 
-La cerradura debe enviar `X-Device-Key: <DEVICE_API_KEY>` junto con `image` como campo multipart. Una respuesta `authorized: true` autoriza la apertura. Los motivos de rechazo y los fallos de detección se guardan en el historial.
+La cerradura debe enviar `X-Device-Key: <DEVICE_API_KEY>` junto con `image` como campo multipart. Una respuesta `authorized: true` autoriza la apertura. Los motivos de rechazo y los fallos de detección se guardan en el historial. Todos los intentos guardan su foto en `ACCESS_ATTEMPTS_DIR` con el nombre `<log_id>.<ext>` (extensión según el tipo recibido o el nombre original, `.bin` si se desconoce), se registra la ruta en `access_logs.image_path` y se devuelve como `log_id` e `image_path` en la respuesta. Esto incluye tipos no permitidos, imágenes que superan el tamaño de procesamiento y fallos de detección. Solo si el upload supera `MAX_STORED_IMAGE_SIZE_BYTES` (tope de seguridad, 25 MB por defecto) el intento queda sin foto.
 
 ## Consideraciones
 

@@ -25,6 +25,7 @@ services:
       - "${API_PORT:-8000}:8000"
     volumes:
       - insightface_models:/root/.insightface
+      - access_attempt_images:/app/storage/access_attempts
     depends_on:
       db:
         condition: service_healthy
@@ -33,3 +34,4 @@ services:
 volumes:
   postgres_data:
   insightface_models:
+  access_attempt_images:

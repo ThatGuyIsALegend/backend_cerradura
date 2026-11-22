@@ -19,6 +19,13 @@ class Settings(BaseSettings):
     FACE_MATCH_THRESHOLD: float = 0.45
     MAX_IMAGE_SIZE_BYTES: int = 5 * 1024 * 1024
 
+    # Almacenamiento de fotos de intentos de acceso
+    ACCESS_ATTEMPTS_DIR: str = "storage/access_attempts"
+    # Tope de seguridad al leer el upload para guardar TODOS los intentos,
+    # incluidos los de tipo/tamaño inválidos. Debe ser mayor que
+    # MAX_IMAGE_SIZE_BYTES.
+    MAX_STORED_IMAGE_SIZE_BYTES: int = 25 * 1024 * 1024
+
     # Configuración CORS
     CORS_ORIGINS: str = "*"
 

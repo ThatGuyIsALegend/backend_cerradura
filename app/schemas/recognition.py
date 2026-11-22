@@ -16,3 +16,5 @@ class AccessAttemptResponse(BaseModel):
     reason: str
     similarity: float | None = None
     user_id: UUID | None = None
+    log_id: UUID | None = None
+    image_path: str | None = None
