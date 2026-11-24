@@ -2,11 +2,16 @@ from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
+from app.core.security import authenticate_device
 from app.database.connection import get_db
 from app.schemas.recognition import RecognitionResponse
 from app.services import face_service
 
-router = APIRouter(prefix="/recognition", tags=["Reconocimiento"])
+router = APIRouter(
+    prefix="/recognition",
+    tags=["Reconocimiento"],
+    dependencies=[Depends(authenticate_device)]
+)
 
 
 def read_image(image: UploadFile) -> bytes:

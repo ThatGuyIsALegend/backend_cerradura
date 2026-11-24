@@ -12,13 +12,16 @@ from app.services.attempt_images import (
     save_attempt_image,
 )
 
-router = APIRouter(prefix="/devices", tags=["Cerradura"])
+router = APIRouter(
+    prefix="/devices",
+    tags=["Cerradura"],
+    dependencies=[Depends(authenticate_device)]
+)
 
 ALLOWED_IMAGE_TYPES = ("image/jpeg", "image/png")
 
 
-@router.post("/access-attempt", response_model=AccessAttemptResponse,
-             dependencies=[Depends(authenticate_device)])
+@router.post("/access-attempt", response_model=AccessAttemptResponse)
 def access_attempt(image: UploadFile = File(...), db: Session = Depends(get_db)):
     user = None
     similarity = None

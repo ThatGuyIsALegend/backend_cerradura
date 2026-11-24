@@ -1,10 +1,11 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
 from app.core.config import settings
+from app.core.security import authenticate_device
 from app.database.connection import engine, Base
 from app.services.attempt_images import storage_dir
 
@@ -48,7 +49,9 @@ app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION,
     debug=settings.DEBUG,
-    lifespan=lifespan
+    lifespan=lifespan,
+    # Ningún endpoint es accesible sin la clave del dispositivo.
+    dependencies=[Depends(authenticate_device)]
 )
 
 

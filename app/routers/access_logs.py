@@ -6,11 +6,16 @@ from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from app.database.connection import get_db
+from app.core.security import authenticate_device
 from app.schemas.access_log import AccessLogResponse
 from app.services import access_service
 from app.services.attempt_images import resolve_attempt_image_path
 
-router = APIRouter(prefix="/access-logs", tags=["Historial"])
+router = APIRouter(
+    prefix="/access-logs",
+    tags=["Historial"],
+    dependencies=[Depends(authenticate_device)]
+)
 
 
 @router.get("", response_model=list[AccessLogResponse])

@@ -13,6 +13,7 @@ from fastapi import (
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 
+from app.core.security import authenticate_device
 from app.database.connection import get_db
 
 from app.schemas.user import (
@@ -27,7 +28,8 @@ from app.services import face_service
 
 router = APIRouter(
     prefix="/users",
-    tags=["Users"]
+    tags=["Users"],
+    dependencies=[Depends(authenticate_device)]
 )
 
 
