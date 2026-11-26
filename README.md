@@ -55,6 +55,8 @@ Todas las rutas usan el prefijo `/api/v1`.
 
 La cerradura debe enviar `X-Device-Key: <DEVICE_API_KEY>` junto con `image` como campo multipart. Una respuesta `authorized: true` autoriza la apertura. Los motivos de rechazo y los fallos de detección se guardan en el historial. Todos los intentos guardan su foto en `ACCESS_ATTEMPTS_DIR` con el nombre `<log_id>.<ext>` (extensión según el tipo recibido o el nombre original, `.bin` si se desconoce), se registra la ruta en `access_logs.image_path` y se devuelve como `log_id` e `image_path` en la respuesta. Esto incluye tipos no permitidos, imágenes que superan el tamaño de procesamiento y fallos de detección. Solo si el upload supera `MAX_STORED_IMAGE_SIZE_BYTES` (tope de seguridad, 25 MB por defecto) el intento queda sin foto.
 
+El reconocimiento (`/recognition/verify` y `/devices/access-attempt`) acepta fotos con varios rostros: compara cada rostro detectado contra las personas registradas y autoriza si alguno supera `FACE_MATCH_THRESHOLD`, devolviendo la mejor coincidencia. El registro (`POST /users` y `POST /users/{id}/faces`) sigue exigiendo exactamente un rostro para no asociar la cara de otra persona al nombre equivocado.
+
 ## Consideraciones
 
 `create_all` solo crea tablas ausentes; no migra esquemas existentes. Para instalaciones con tablas previas, se debe aplicar una migración antes de desplegar el modelo sin `devices` y sin `access_logs.device_id`. Las rutas de administración (personas e historial) requieren autenticación de administrador antes de exponer la API fuera de una red controlada.

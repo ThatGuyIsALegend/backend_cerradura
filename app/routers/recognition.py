@@ -26,10 +26,10 @@ def read_image(image: UploadFile) -> bytes:
 @router.post("/verify", response_model=RecognitionResponse)
 def verify_face(image: UploadFile = File(...), db: Session = Depends(get_db)):
     try:
-        embedding = face_service.extract_face_embedding(read_image(image))
+        embeddings = face_service.extract_face_embeddings(read_image(image))
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
-    user, similarity = face_service.recognize_face(db, embedding)
+    user, similarity = face_service.recognize_faces(db, embeddings)
     matched = user is not None and similarity >= settings.FACE_MATCH_THRESHOLD
     return RecognitionResponse(
         matched=matched,

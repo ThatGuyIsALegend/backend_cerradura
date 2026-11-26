@@ -47,8 +47,8 @@ def access_attempt(image: UploadFile = File(...), db: Session = Depends(get_db))
         if len(raw_bytes) > settings.MAX_IMAGE_SIZE_BYTES:
             raise HTTPException(
                 status_code=413, detail="La imagen supera el tamaño permitido")
-        embedding = face_service.extract_face_embedding(raw_bytes)
-        user, similarity = face_service.recognize_face(db, embedding)
+        embeddings = face_service.extract_face_embeddings(raw_bytes)
+        user, similarity = face_service.recognize_faces(db, embeddings)
         authorized = user is not None and similarity >= settings.FACE_MATCH_THRESHOLD
         if authorized:
             result, reason = "granted", "face_match"
